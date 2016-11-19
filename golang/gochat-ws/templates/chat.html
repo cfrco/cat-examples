@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Chat</title>
+
+    <link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+  </head>
+
+  <body>
+    <div id="chat-area">
+    </div>
+
+    <div class="footer navbar-fixed-bottom">
+      <form id="chat-form">
+        <span id="user-name"></span> : <input type="text" name="message" id="message">
+        <input type="hidden" name="user_name" id="user-name-input">
+        <input type="submit" value="Send">
+      </form>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/static/jquery.min.js"><\/script>')</script>
+
+    <script>
+      var roomName = "{{.RoomName}}";
+      var userName = prompt("Please enter your name", "");
+
+      // User Name
+      $("#user-name")[0].innerHTML = userName;
+      $("#user-name-input")[0].value = userName;
+      
+      // SSE receiver
+      var ws = new WebSocket("ws://127.0.0.1:8080/ws/" + roomName + "?user_name=" + userName);
+      ws.onmessage = function(e) {
+        $("#chat-area")[0].innerHTML += e.data + "<br>";
+        window.scroll(0, document.body.scrollHeight);
+      };
+
+      // Send
+      $("#chat-form").submit(function(e) {
+        ws.send($("#message")[0].value+"\n");
+        $("#message")[0].value = "";
+        e.preventDefault();
+      });
+    </script>
+  </body>
+</html>
+
